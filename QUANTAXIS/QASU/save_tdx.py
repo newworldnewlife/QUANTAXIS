@@ -319,6 +319,7 @@ def QA_SU_save_etf_min(client=QA_Setting.client):
 
 
 def QA_SU_save_stock_list(client=QA_Setting.client):
+    # 直接替换，非增量更新
     client.quantaxis.drop_collection('stock_list')
     __coll = client.quantaxis.stock_list
     __coll.create_index('code')
@@ -333,6 +334,7 @@ def QA_SU_save_stock_list(client=QA_Setting.client):
 
 
 def QA_SU_save_stock_block(client=QA_Setting.client):
+    # 直接替换，非增量更新
     client.quantaxis.drop_collection('stock_block')
     __coll = client.quantaxis.stock_block
     __coll.create_index('code')
@@ -348,9 +350,52 @@ def QA_SU_save_stock_block(client=QA_Setting.client):
 def QA_SU_save_stock_transaction(client=QA_Setting.client):
     __stock_list = QA_fetch_get_stock_time_to_market()
     __coll = client.quantaxis.stock_transaction
-    __coll.create_index('code',pymongo.ASCENDING)
+    # 创建3个索引，因为code是下面生成的，QA_fetch_get_stock_transaction返回的值
+    # 又带datetime索引，datetime实际是date_stamp和time_stamp组成，所以要3个索引位
+    __coll.create_index([('code',pymongo.ASCENDING),('time_stamp',pymongo.ASCENDING),('date_stamp',pymongo.ASCENDING)])
     __err = []
 
+    # 以下待修改[TODO]
+    def __saving_work(code, __coll):
+        QA_util_log_info('##JOB10 Now Saving STOCK_TRANSACTION ==== %s' % (str(code)))
+        try:
+            for type in ['1min', '5min', '15min', '30min', '60min']:
+                ref_ = __coll.find(
+                    {'code': str(code)[0:6], 'type': type})
+                end_time = str(now_time())[0:19]
+                if ref_.count() > 0:
+                    start_time = ref_[ref_.count() - 1]['datetime']
+                else:
+                    start_time = '2015-01-01'
+                QA_util_log_info(
+                    '##JOB03.%s Now Saving %s from %s to %s ==%s ' % (['1min', '5min', '15min', '30min', '60min'].index(type), str(code), start_time, end_time, type))
+                if start_time != end_time:
+                    __data = QA_fetch_get_stock_min(
+                        str(code), start_time, end_time, type)
+                    if len(__data) > 1:
+                        __coll.insert_many(
+                            QA_util_to_json_from_pandas(__data[1::]))
+
+        except Exception as e:
+            QA_util_log_info(e)
+
+            __err.append(code)
+
+    executor = ThreadPoolExecutor(max_workers=4)
+    #executor.map((__saving_work, __stock_list.index[i_], __coll),URLS)
+    res = {executor.submit(
+        __saving_work, __stock_list.index[i_], __coll) for i_ in range(len(__stock_list))}
+    count = 0
+    for i_ in concurrent.futures.as_completed(res):
+        QA_util_log_info('The %s of Total %s' % (count, len(__stock_list)))
+        QA_util_log_info('DOWNLOAD PROGRESS %s ' % str(
+            float(count / len(__stock_list) * 100))[0:4] + '%')
+        count = count + 1
+    QA_util_log_info('ERROR CODE \n ')
+    QA_util_log_info(__err)
+
+'''
+原作者函数
     def __saving_work(code):
         QA_util_log_info(
             '##JOB10 Now Saving STOCK_TRANSACTION ==== %s' % (str(code)))
@@ -368,7 +413,7 @@ def QA_SU_save_stock_transaction(client=QA_Setting.client):
         __saving_work(__stock_list.index[i_])
     QA_util_log_info('ERROR CODE \n ')
     QA_util_log_info(__err)
-
+'''
 
 if __name__ == '__main__':
     # QA_SU_save_stock_day()

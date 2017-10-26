@@ -53,10 +53,17 @@ def ping(ip):
 
 
 def select_best_ip():
+    '''
+    通达信普通行情服务器很多数据错误，目前发现仅电信服务器
+    杭州'60.191.117.167'与客户端得到的level数据基本一致，
+    但也有丢包。
+    [TODO]测试更多服务器的数据，找出更多数据正确的服务器。
+    '''
     QA_util_log_info('Selecting the Best Server IP of TDX')
-    listx = ['218.75.126.9', '115.238.90.165',
-             '124.160.88.183', '60.12.136.250', '218.108.98.244', '218.108.47.69',
-             '14.17.75.71', '180.153.39.51']
+    listx = ['60.191.117.167']
+            #['218.75.126.9', '115.238.90.165',
+            # '124.160.88.183', '60.12.136.250', '218.108.98.244', '218.108.47.69',
+            # '14.17.75.71', '180.153.39.51'] 
     data = [ping(x) for x in listx]
     QA_util_log_info('===The BEST SERVER is :  %s ===' %
                      (listx[data.index(min(data))]))
@@ -75,7 +82,7 @@ def __select_market_code(code):
     return 0
 
 
-def QA_fetch_get_stock_day(code, start_date, end_date, if_fq='00', level='day', ip=best_ip, port=7709):
+def QA_fetch_get_stock_day(code, start_date, end_date, if_fq='01', level='day', ip=best_ip, port=7709):
     api = TdxHq_API()
     with api.connect(ip, port):
 
@@ -288,7 +295,22 @@ def QA_fetch_get_stock_latest(code, ip=best_ip, port=7709):
             .drop(['year', 'month', 'day', 'hour', 'minute', 'datetime'], axis=1)
 
 
-def QA_fetch_get_stock_realtime(code=['000001', '000002'], ip=best_ip, port=7709):
+def QA_fetch_get_stock_realtime(code=['000001', '000002'], 
+                                fields=['datetime', 'code', 'open', 'high', 'low', 'price'],
+                                index = 'code', 
+                                ip=best_ip, 
+                                port=7709):
+    '''
+    api单次最多只能取80只，这里作者做了包装，不再受此限制
+    fields:['market', 'code', 'active1', 'price', 'last_close', 'open', 'high',
+           'low', 'reversed_bytes0', 'reversed_bytes1', 'vol', 'cur_vol', 'amount',
+           's_vol', 'b_vol', 'reversed_bytes2', 'reversed_bytes3', 'bid1', 'ask1',
+           'bid_vol1', 'ask_vol1', 'bid2', 'ask2', 'bid_vol2', 'ask_vol2', 'bid3',
+           'ask3', 'bid_vol3', 'ask_vol3', 'bid4', 'ask4', 'bid_vol4', 'ask_vol4',
+           'bid5', 'ask5', 'bid_vol5', 'ask_vol5', 'reversed_bytes4',
+           'reversed_bytes5', 'reversed_bytes6', 'reversed_bytes7',
+           'reversed_bytes8', 'reversed_bytes9', 'active2']
+    '''
     api = TdxHq_API()
     __data = pd.DataFrame()
     with api.connect(ip, port):
@@ -297,8 +319,8 @@ def QA_fetch_get_stock_realtime(code=['000001', '000002'], ip=best_ip, port=7709
             __data = __data.append(api.to_df(api.get_security_quotes(
                 [(__select_market_code(x), x) for x in code[80 * id_:80 * (id_ + 1)]])))
             __data['datetime'] = datetime.datetime.now()
-        data = __data[['datetime', 'code', 'open', 'high', 'low', 'price']]
-        return data.set_index('code', drop=False, inplace=False)
+        data = __data[fields]
+        return data.set_index(index, drop=False, inplace=False)
 
 
 def QA_fetch_get_stock_list(type_='stock', ip=best_ip, port=7709):

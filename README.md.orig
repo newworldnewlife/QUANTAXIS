@@ -262,10 +262,7 @@ cd web
 ```
 ### 启动QUANTAXIS CLI 并进行数据的初始化存储
 
-注意：检查是否将python安装目录下的Scripts文件夹所在位置添加进系统环境变量path，否则直接输入quantaxis无法启动quantaxis客户端及其他任何python编译完成的exe文件，如jupyter等
-
-或者可以通过在命令行输入 python -m QUANTAXIS 进去quantaxis CLI
-
+在命令行输入 python -m QUANTAXIS 进去quantaxis CLI
 quantaxis> save all
 
 随意新建一个目录:(不要跟QUANTAXIS文件夹在一个目录)

@@ -34,15 +34,24 @@ import subprocess
 
 from QUANTAXIS.QABacktest.QAAnalysis import QA_backtest_analysis_start
 from QUANTAXIS.QAUtil import QA_util_log_info, QA_Setting, QA_util_mongo_initial, QA_util_mongo_make_index
+# 引用QASU的main.py里的函数名
 from QUANTAXIS import (QA_SU_save_stock_list, QA_SU_save_stock_min, QA_SU_save_stock_xdxr,QA_SU_save_stock_block,
                        QA_SU_save_stock_day, QA_SU_save_index_day, QA_SU_save_index_min, QA_SU_save_etf_day, QA_SU_save_etf_min,
-                       QA_SU_update_stock_day)
+                       QA_SU_update_stock_day, QA_SU_save_stock_transaction)
 
 from QUANTAXIS import *
 from QUANTAXIS import __version__
 
 
 class CLI(cmd.Cmd):
+    '''
+    python32位和64位并存时，在cmd窗口中通过python32 -m QUANTAXIS 
+    来运行QUANTAXIS CLI，或通过添加python安装目录里的scripy文件夹
+    至系统path，即可直接输入quantaxis来运行cli，因为可执行客户端
+    在scripy文件夹内。
+    类内的do_命令名函数就是对应的cmd中的命令，比如输入save，执行的
+    就是此类中的do_save()函数
+    '''
 
     def __init__(self):
         cmd.Cmd.__init__(self)
@@ -82,6 +91,9 @@ class CLI(cmd.Cmd):
         print('make a sample backtest framework')
 
     def do_drop_database(self, arg):
+        '''
+        使数据库返回初始化，删除所有已下载的数据
+        '''
         QA_util_mongo_initial()
 
     def help_drop_database(self):
@@ -101,6 +113,9 @@ class CLI(cmd.Cmd):
         print("-- terminates the application")
 
     def do_clean(self, arg):
+        '''
+        目前实现有误
+        '''
         try:
             if platform.system() == 'Windows':
                 os.popen('del back*csv')
@@ -126,9 +141,10 @@ class CLI(cmd.Cmd):
         # 仅仅是为了初始化才在这里插入用户,如果想要注册用户,要到webkit底下注册
         if arg == '':
             print(
-                "Usage: save all|X|x|day|min|insert_user|stock_day|stock_xdxr|stock_min|index_day|index_min|etf_day|etf_min|stock_list|stock_block")
+                "Usage: save all|X|x|day|min|T|t|insert_user|stock_day|stock_xdxr|stock_min|index_day|index_min|etf_day|etf_min|stock_list|stock_block")
         else:
             arg = arg.split(' ')
+            # 用于初始化测试使用，下载（增量更新）所有股票、指数、etf的日K数据
             if len(arg) == 1 and arg[0] == 'all':
                 QA_Setting.client.quantaxis.user_list.insert(
                     {'username': 'admin', 'password': 'admin'})
@@ -141,6 +157,7 @@ class CLI(cmd.Cmd):
                 #QA_SU_save_etf_min('tdx')
                 QA_SU_save_stock_list('tdx')
                 QA_SU_save_stock_block('tdx')
+            # 下载（增量更新）所有股票、指数、etf的日K数据
             elif len(arg) == 1 and arg[0] == 'day':
                 QA_Setting.client.quantaxis.user_list.insert(
                     {'username': 'admin', 'password': 'admin'})
@@ -153,6 +170,7 @@ class CLI(cmd.Cmd):
                 #QA_SU_save_etf_min('tdx')
                 QA_SU_save_stock_list('tdx')
                 QA_SU_save_stock_block('tdx')
+            # 下载（增量更新）所有股票、指数、etf的分钟K数据
             elif len(arg) == 1 and arg[0] == 'min':
                 QA_Setting.client.quantaxis.user_list.insert(
                     {'username': 'admin', 'password': 'admin'})
@@ -165,6 +183,15 @@ class CLI(cmd.Cmd):
                 QA_SU_save_etf_min('tdx')
                 QA_SU_save_stock_list('tdx')
                 QA_SU_save_stock_block('tdx')
+            # 下载（增量更新）所有股票的TICK数据
+            elif len(arg) == 1 and arg[0] in ['T','t']:
+                QA_Setting.client.quantaxis.user_list.insert(
+                    {'username': 'admin', 'password': 'admin'})
+                QA_SU_save_stock_transaction('tdx')
+                QA_SU_save_stock_xdxr('tdx')
+                QA_SU_save_stock_list('tdx')
+                QA_SU_save_stock_block('tdx')
+            # 下载（增量更新）所有股票、指数、etf的日K、分钟K数据
             elif len(arg) == 1 and arg[0] in ['X','x']:
                 QA_Setting.client.quantaxis.user_list.insert(
                     {'username': 'admin', 'password': 'admin'})

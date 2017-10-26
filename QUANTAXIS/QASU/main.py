@@ -76,6 +76,11 @@ def QA_SU_save_etf_min(engine, client=QA_Setting.client):
     engine.QA_SU_save_etf_min(client)
 
 
+def QA_SU_save_stock_transaction(engine, client=QA_Setting.client):
+    engine = select_save_engine(engine)
+    engine.QA_SU_save_stock_transaction(client)
+
+
 def QA_SU_save_stock_xdxr(engine, client=QA_Setting.client):
     engine = select_save_engine(engine)
     engine.QA_SU_save_stock_xdxr(client)
@@ -83,9 +88,12 @@ def QA_SU_save_stock_xdxr(engine, client=QA_Setting.client):
 def QA_SU_save_stock_block(engine, client=QA_Setting.client):
     engine = select_save_engine(engine)
     engine.QA_SU_save_stock_block(client)
+
+
 def QA_SU_save_stock_day_init(startDate, engine, client=QA_Setting.client):
     engine = select_save_engine(engine)
     engine.QA_SU_save_stock_day_init(startDate, client)
+
 
 
 def QA_SU_update_stock_day(engine, client=QA_Setting.client):

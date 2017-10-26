@@ -51,6 +51,7 @@ def QA_fetch_stock_day_adv(
         code,
         __start, __end,
         if_drop_index=False,
+        skip_paused = True,
         collections=QA_Setting.client.quantaxis.stock_day):
     '获取股票日线'
     __start = str(__start)[0:10]
@@ -69,7 +70,11 @@ def QA_fetch_stock_day_adv(
             __data = DataFrame(__data, columns=[
                 'code', 'open', 'high', 'low', 'close', 'volume', 'date'])
             __data['date'] = pd.to_datetime(__data['date'])
-            return QA_DataStruct_Stock_day(__data.query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+            if skip_paused:
+                return QA_DataStruct_Stock_day(__data.query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+            elif skip_paused== False:
+                return QA_DataStruct_Stock_day(__data.set_index(['date', 'code'], drop=if_drop_index))
+            
         else:
             QA_util_log_info('something wrong with date')
     elif isinstance(code, list):
@@ -80,15 +85,20 @@ def QA_fetch_stocklist_day_adv(
         code,
         __start, __end,
         if_drop_index=False,
+        skip_paused = True,
         collections=QA_Setting.client.quantaxis.stock_day):
     '获取股票日线'
-    return QA_DataStruct_Stock_day(pd.concat(QA_fetch_stocklist_day(code, [__start, __end])).query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+    if skip_paused:
+        return QA_DataStruct_Stock_day(pd.concat(QA_fetch_stocklist_day(code, [__start, __end])).query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+    elif skip_paused == False:
+        return QA_DataStruct_Stock_day(pd.concat(QA_fetch_stocklist_day(code, [__start, __end])).set_index(['date', 'code'], drop=if_drop_index))
 
 
 def QA_fetch_index_day_adv(
         code,
         __start, __end,
         if_drop_index=False,
+        skip_paused = True,
         collections=QA_Setting.client.quantaxis.index_day):
     '获取指数日线'
     __start = str(__start)[0:10]
@@ -105,12 +115,18 @@ def QA_fetch_index_day_adv(
             __data = DataFrame(__data, columns=[
                 'code', 'open', 'high', 'low', 'close', 'volume', 'date'])
             __data['date'] = pd.to_datetime(__data['date'])
-            return QA_DataStruct_Index_day(__data.query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+            if skip_paused:
+                return QA_DataStruct_Index_day(__data.query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+            elif skip_paused == False:
+                return QA_DataStruct_Index_day(__data.set_index(['date', 'code'], drop=if_drop_index))
         else:
             QA_util_log_info('something wrong with date')
 
     elif isinstance(code, list):
-        return QA_DataStruct_Index_day(pd.concat(QA_fetch_indexlist_day(code, [__start, __end])).query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+        if skip_paused:
+            return QA_DataStruct_Index_day(pd.concat(QA_fetch_indexlist_day(code, [__start, __end])).query('volume>1').set_index(['date', 'code'], drop=if_drop_index))
+        elif skip_paused == False:
+            return QA_DataStruct_Index_day(pd.concat(QA_fetch_indexlist_day(code, [__start, __end])).set_index(['date', 'code'], drop=if_drop_index))
 
 
 def QA_fetch_index_min_adv(
@@ -118,6 +134,7 @@ def QA_fetch_index_min_adv(
         start, end,
         type_='1min',
         if_drop_index=False,
+        skip_paused = True,
         collections=QA_Setting.client.quantaxis.index_min):
     '获取股票分钟线'
     if type_ in ['1min', '1m']:
@@ -146,7 +163,10 @@ def QA_fetch_index_min_adv(
             'code', 'open', 'high', 'low', 'close', 'volume', 'datetime', 'time_stamp', 'date'])
 
         __data['datetime'] = pd.to_datetime(__data['datetime'])
-        return QA_DataStruct_Index_min(__data.query('volume>1').set_index(['datetime', 'code'], drop=if_drop_index))
+        if skip_paused:
+            return QA_DataStruct_Index_min(__data.query('volume>1').set_index(['datetime', 'code'], drop=if_drop_index))
+        elif skip_paused == False:
+            return QA_DataStruct_Index_min(__data.set_index(['datetime', 'code'], drop=if_drop_index))
 
     elif isinstance(code, list):
         return QA_DataStruct_Index_min(pd.concat([QA_fetch_index_min_adv(code_, start, end, type_, if_drop_index).data for code_ in code]).set_index(['datetime', 'code'], drop=if_drop_index))
@@ -157,8 +177,13 @@ def QA_fetch_stock_min_adv(
         start, end,
         type_='1min',
         if_drop_index=False,
+        skip_paused = True,
         collections=QA_Setting.client.quantaxis.stock_min):
-    '获取股票分钟线'
+    '''
+    获取股票分钟线，code可以是str或者list
+    返回的数据不包括end
+        
+    '''
     if type_ in ['1min', '1m']:
         type_ = '1min'
     elif type_ in ['5min', '5m']:
@@ -187,7 +212,13 @@ def QA_fetch_stock_min_adv(
             'code', 'open', 'high', 'low', 'close', 'volume', 'datetime', 'time_stamp', 'date'])
 
         __data['datetime'] = pd.to_datetime(__data['datetime'])
-        return QA_DataStruct_Stock_min(__data.query('volume>1').set_index(['datetime', 'code'], drop=if_drop_index))
+        # 分钟数据上成交量为0的会是停牌的股票和竞价时间段的股票，所有如果'volume>1'就会造成分时上缺少58-59分钟的数据
+        # 但这只是输出部分，在数据库中还是按原始保存的，可以添加skip_paused参数来选择
+        if skip_paused:
+            return QA_DataStruct_Stock_min(__data.query('volume>1').set_index(['datetime', 'code'], drop=if_drop_index))
+        elif skip_paused == False:
+            return QA_DataStruct_Stock_min(__data.set_index(['datetime', 'code'], drop=if_drop_index))
+
     elif isinstance(code, list):
         '新增codelist的代码'
         return QA_DataStruct_Stock_min(pd.concat([QA_fetch_stock_min_adv(code_, start, end, type_, if_drop_index).data for code_ in code]).set_index(['datetime', 'code'], drop=if_drop_index))
@@ -197,8 +228,13 @@ def QA_fetch_stocklist_min_adv(
         code,
         start, end,
         type_='1min',
-        if_drop_index=False,  collections=QA_Setting.client.quantaxis.stock_min):
-    return QA_DataStruct_Stock_min(pd.concat(QA_fetch_stocklist_min(code, [start, end], type_)).query('volume>1').set_index(['datetime', 'code'], drop=if_drop_index))
+        if_drop_index=False,
+        skip_paused = True,  
+        collections=QA_Setting.client.quantaxis.stock_min):
+    if skip_paused:
+        return QA_DataStruct_Stock_min(pd.concat(QA_fetch_stocklist_min(code, [start, end], type_)).query('volume>1').set_index(['datetime', 'code'], drop=if_drop_index))
+    elif skip_paused == False:
+        return QA_DataStruct_Stock_min(pd.concat(QA_fetch_stocklist_min(code, [start, end], type_)).set_index(['datetime', 'code'], drop=if_drop_index))
 
 
 def QA_fetch_stock_transaction_adv(

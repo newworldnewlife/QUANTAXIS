@@ -32,6 +32,10 @@ from QUANTAXIS.QAFetch.QATdx import QA_fetch_get_stock_realtime
 
 
 class __stock_hq_base():
+    '''
+    原作者自定义的数据结构体，实际上返回的结果基本上都是dataframe和series等
+    所以可以用操作dataframe，series，array的切片/索引等操作
+    '''
     def __init__(self, DataFrame):
         self.data = DataFrame
         self.type = ''
