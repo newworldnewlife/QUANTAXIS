@@ -35,6 +35,7 @@ from . import QAWind as QAWind
 from . import QATushare as QATushare
 from . import QATdx as QATdx
 from . import QAThs as QAThs
+
 #import QAFetch.QAGmsdk as QAGmsdk
 #import QAFetch.QACrawlData as QACD
 
@@ -43,17 +44,15 @@ class QA_Fetcher():
     """
     一个通用的数据获取方法类
 
-    
+
     """
+
     def __init__(self, *args, **kwargs):
-         pass
+        pass
+
     @property
     def security_list(self):
         return self.security_list
-
-
-
-
 
 
 def use(package):
@@ -146,15 +145,19 @@ def QA_fetch_get_index_min(package, code, start, end, level='1min'):
 
 def QA_fetch_get_stock_block(package):
     Engine = use(package)
-    if package in ['tdx', 'pytdx']:
+    if package in ['tdx', 'pytdx', 'ths']:
         return Engine.QA_fetch_get_stock_block()
     else:
         return 'Unsupport packages'
 
 
-def QA_fetch_get_stock_info(package,code):
+def QA_fetch_get_stock_info(package, code):
     Engine = use(package)
     if package in ['tdx', 'pytdx']:
         return Engine.QA_fetch_get_stock_info(code)
     else:
         return 'Unsupport packages'
+
+
+def QA_fetch_security_bars(code, _type, lens):
+    return QATdx.QA_fetch_security_bars(code, _type, lens)

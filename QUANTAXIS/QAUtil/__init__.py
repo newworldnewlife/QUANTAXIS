@@ -33,20 +33,20 @@ from .QADate import(QA_util_date_stamp, QA_util_time_stamp, QA_util_ms_stamp, QA
                     QA_util_get_index_date, QA_util_select_hours, QA_util_date_int2str, QA_util_date_today,
                     QA_util_select_min, QA_util_time_delay, QA_util_time_now, QA_util_date_str2int)
 # sql设置
-from .QASql import (QA_util_sql_mongo_setting)
+from .QASql import (QA_util_sql_mongo_setting, QA_util_sql_async_mongo_setting)
 # log 文件相关
 from .QALogs import (
     QA_util_log_debug, QA_util_log_expection, QA_util_log_info)
 # config 文件相关
 from .QACfg import (QA_util_cfg_initial, QA_util_get_cfg)
 # QUANTAXIS设置相关
-from .QASetting import QA_Setting
+from .QASetting import QA_Setting, info_ip_list
 # 网络相关
 from .QAWeb import QA_util_web_ping
 # 交易日相关
 from .QADate_trade import (trade_date_sse, QA_util_if_trade, QA_util_date_gap,
                            QA_util_get_real_datelist, QA_util_get_real_date,
-                           QA_util_get_trade_range)
+                           QA_util_get_trade_range, QA_util_get_trade_gap)
 # csv 文件相关
 from .QACsv import QA_util_save_csv
 # list格式相关

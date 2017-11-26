@@ -67,6 +67,18 @@ def QA_util_time_stamp(time_):
         return time.mktime(time.strptime(timestr, '%Y-%m-%d %H:%M:%S'))
 
 
+def QA_util_stamp2datetime(timestamp):
+    """
+    datestamp转datetime
+    
+    pandas转出来的timestamp是13位整数 要/1000
+    
+    """
+    try:
+        return datetime.datetime.fromtimestamp(timestamp)
+    except Exception as e:
+        return datetime.datetime.fromtimestamp(timestamp/1000)
+
 def QA_util_ms_stamp(ms):
     return ms
 
@@ -226,9 +238,10 @@ def QA_util_time_delay(time_=0):
 
 def QA_util_calc_time(func, *args, **kwargs):
     '耗时长度的装饰器'
-    time = datetime.datetime.now()
+    _time = datetime.datetime.now()
     func(*args, **kwargs)
-    print(datetime.datetime.now - time)
+    print(datetime.datetime.now() - _time)
+    #return datetime.datetime.now() - _time
 
 
 if __name__ == '__main__':

@@ -186,9 +186,9 @@ def QA_indicator_RSI(DataFrame, N1, N2, N3):
     '相对强弱指标RSI1:SMA(MAX(CLOSE-LC,0),N1,1)/SMA(ABS(CLOSE-LC),N1,1)*100;'
     CLOSE = DataFrame['close']
     LC = REF(CLOSE, 1)
-    RSI1 = SMA(MAX(CLOSE - LC, 0), N1, 1) / SMA(ABS(CLOSE - LC), N1, 1) * 100
-    RSI2 = SMA(MAX(CLOSE - LC, 0), N2, 1) / SMA(ABS(CLOSE - LC), N2, 1) * 100
-    RSI3 = SMA(MAX(CLOSE - LC, 0), N3, 1) / SMA(ABS(CLOSE - LC), N3, 1) * 100
+    RSI1 = SMA(MAX(CLOSE - LC, 0), N1) / SMA(ABS(CLOSE - LC), N1) * 100
+    RSI2 = SMA(MAX(CLOSE - LC, 0), N2) / SMA(ABS(CLOSE - LC), N2) * 100
+    RSI3 = SMA(MAX(CLOSE - LC, 0), N3) / SMA(ABS(CLOSE - LC), N3) * 100
     DICT = {'RSI1': RSI1, 'RSI2': RSI2, 'RSI3': RSI3}
 
     return DICT
@@ -263,3 +263,30 @@ def QA_indicator_ASI(DataFrame,M1,M2):
     
     #R=IF(AA>BB AND AA>CC,AA+BB/2+DD/4,IF(BB>CC AND BB>AA,BB+AA/2+DD/4,CC+DD/4))
     X=(CLOSE-LC+(CLOSE-OPEN)/2+LC-REF(OPEN,1))
+
+def QA_indicator_MA(DataFrame,N):
+    CLOSE = DataFrame['close']
+    return MA(CLOSE,N)
+
+def QA_indicator_EMA(DataFrame,N):
+    CLOSE = DataFrame['close']
+    return EMA(CLOSE,N)
+
+def QA_indicator_SMA(DataFrame,N):
+    CLOSE = DataFrame['close']
+    return SMA(CLOSE,N)
+
+
+def lower_shadow(DataFrame):#下影线
+    return abs(DataFrame.low-MIN(DataFrame.open,DataFrame.close))
+def upper_shadow(DataFrame):#上影线
+    return abs(DataFrame.high-MAX(DataFrame.open,DataFrame.close))
+def body_abs(DataFrame):
+    return abs(DataFrame.open-DataFrame.close)
+def body(DataFrame):
+    return DataFrame.close-DataFrame.open
+
+def price_pcg(DataFrame):
+    return body(DataFrame)/DataFrame.open
+def amplitude(DataFrame):
+    return (DataFrame.high-DataFrame.low)/DataFrame.low

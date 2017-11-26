@@ -31,7 +31,7 @@ by yutiansut
 
 2017/4/8
 """
-__version__ = '0.5.7'
+__version__ = '0.5.21'
 __author__ = 'yutiansut'
 logo = ' \n \
 ```````````````````````````````````````````````````````````````````````````````````````````````````````````````````````` \n \
@@ -56,18 +56,19 @@ logo = ' \n \
 
 from QUANTAXIS.QAFetch import (QA_fetch_get_stock_day, QA_fetch_get_trade_date, QA_fetch_get_stock_min, QA_fetch_get_stock_xdxr,
                                QA_fetch_get_stock_indicator, QA_fetch_get_stock_realtime, QA_fetch_get_stock_transaction,
-                               QA_fetch_get_index_day, QA_fetch_get_index_min, QA_fetch_get_stock_list,QA_fetch_get_stock_info,
-                               QA_fetch_get_stock_block)
+                               QA_fetch_get_index_day, QA_fetch_get_index_min, QA_fetch_get_stock_list, QA_fetch_get_stock_info,
+                               QA_fetch_get_stock_block, QA_fetch_security_bars)
 from QUANTAXIS.QAFetch.QAQuery import (QA_fetch_trade_date, QA_fetch_stock_day, QA_fetch_stocklist_day, QA_fetch_index_day,
                                        QA_fetch_stock_min, QA_fetch_stocklist_min, QA_fetch_future_min, QA_fetch_future_day,
                                        QA_fetch_future_tick, QA_fetch_stock_list, QA_fetch_stock_full, QA_fetch_stock_xdxr,
-                                       QA_fetch_backtest_info, QA_fetch_backtest_history,QA_fetch_stock_block)
+                                       QA_fetch_backtest_info, QA_fetch_backtest_history, QA_fetch_stock_block, QA_fetch_stock_info,
+                                       QA_fetch_stock_name)
 
 from QUANTAXIS.QAFetch.QAQuery_Advance import *
 
 # save
 from QUANTAXIS.QASU.main import (QA_SU_save_stock_list, QA_SU_save_stock_day, QA_SU_save_index_day, QA_SU_save_index_min,
-                                 QA_SU_save_stock_min, QA_SU_save_stock_xdxr, QA_SU_save_stock_info, QA_SU_save_stock_min_5,QA_SU_save_stock_block,
+                                 QA_SU_save_stock_min, QA_SU_save_stock_xdxr, QA_SU_save_stock_info, QA_SU_save_stock_min_5, QA_SU_save_stock_block,
                                  QA_SU_save_stock_day_init,  QA_SU_save_trade_date, QA_SU_update_stock_day, QA_SU_save_etf_day, QA_SU_save_etf_min)
 
 from QUANTAXIS.QASU.save_backtest import (
@@ -96,7 +97,7 @@ from QUANTAXIS.QATask import QA_Queue, QA_Event, QA_Job, QA_Engine
 # Data
 from QUANTAXIS.QAData import (QA_data_tick_resample, QA_data_get_hfq, QA_data_get_qfq, QA_data_make_qfq, QA_data_stock_to_fq,
                               QA_data_make_hfq, QA_DataStruct_Stock_day, QA_DataStruct_Stock_min,
-                              QA_DataStruct_Index_day, QA_DataStruct_Index_min, QA_DataStruct_Stock_transaction,QA_DataStruct_Stock_block)
+                              QA_DataStruct_Index_day, QA_DataStruct_Index_min, QA_DataStruct_Stock_transaction, QA_DataStruct_Stock_block)
 # Analysis
 from QUANTAXIS.QAAnalysis import *
 
@@ -117,7 +118,7 @@ from QUANTAXIS.QAUtil import (QA_util_date_stamp, QA_util_time_stamp, QA_util_ms
                               QA_util_web_ping,
                               trade_date_sse, QA_util_if_trade,
                               QA_util_get_real_datelist, QA_util_get_real_date,
-                              QA_util_get_trade_range,
+                              QA_util_get_trade_range, QA_util_get_trade_gap,
                               QA_util_save_csv,
                               QA_util_multi_demension_list, QA_util_diff_list,
                               QA_util_to_json_from_pandas, QA_util_to_list_from_numpy, QA_util_to_list_from_pandas,
